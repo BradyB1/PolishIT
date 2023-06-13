@@ -1,0 +1,75 @@
+###query most_in_demand
+
+SELECT job.title, COUNT(job_has_postings.posting_id) AS num_postings
+FROM job
+JOIN job_has_postings ON job.job_id = job_has_postings.job_id
+GROUP BY job.job_id
+ORDER BY num_postings DESC;
+
+##call it: 
+select * from most_in_demand;
+
+
+##query for location_highest_salary: 
+
+SELECT j.title, MAX(s.salary_from_b2b) AS Salary, l.city, l.country
+FROM group6_polishit.job j
+LEFT JOIN group6_polishit.job_has_location jhl ON j.job_id = jhl.job_id
+LEFT JOIN group6_polishit.location l ON jhl.location_id = l.location_id
+LEFT JOIN group6_polishit.job_has_salaries js ON j.job_id = js.job_id
+LEFT JOIN group6_polishit.salaries s ON js.Salary_id = s.Salary_id
+WHERE s.salary_from_b2b > (
+  SELECT AVG(salary_from_b2b)
+  FROM group6_polishit.salaries
+)
+GROUP BY j.title, l.city, l.country;
+
+
+##call it: 
+select * from location_highest_salary;
+
+
+#query for popular_locations:
+
+SELECT job.job_id, salaries.salary_from_b2b, salaries.salary_to_b2b, job.title, skills.skill_name, job.workplace_type_id
+FROM salaries
+JOIN job_has_salaries ON job_has_salaries.salary_id = salaries.salary_id
+JOIN job ON job.job_id = job_has_salaries.job_id
+JOIN job_has_skills ON job_has_skills.job_id = job.job_id
+JOIN skills ON skills.skill_id = job_has_skills.skill_id
+WHERE job.workplace_type_id = 1
+AND salaries.salary_from_b2b > (SELECT AVG(salary_from_b2b) FROM salaries)
+AND salaries.salary_to_b2b > (SELECT AVG(salary_to_b2b) FROM salaries);
+
+##call it: 
+select * from popular_locations;
+
+
+#query for ideal_position_req_skills:
+
+SELECT job.job_id, salaries.salary_from_b2b, salaries.salary_to_b2b, job.title, skills.skill_name, job.workplace_type_id
+FROM salaries
+JOIN job_has_salaries ON job_has_salaries.salary_id = salaries.salary_id
+JOIN job ON job.job_id = job_has_salaries.job_id
+JOIN job_has_skills ON job_has_skills.job_id = job.job_id
+JOIN skills ON skills.skill_id = job_has_skills.skill_id
+WHERE job.workplace_type_id = 1
+AND salaries.salary_from_b2b > (SELECT AVG(salary_from_b2b) FROM salaries)
+AND salaries.salary_to_b2b > (SELECT AVG(salary_to_b2b) FROM salaries);
+
+##call it 
+select * from ideal_position_req_skills;
+
+
+##query for engineers_feb_july:
+SELECT job.title, COUNT(*) AS count_positions, postings.published_at
+FROM job
+JOIN job_has_postings ON job.job_id = job_has_postings.job_id
+JOIN postings ON job_has_postings.posting_id = postings.posting_id
+WHERE job.title LIKE '%engineer%'
+AND postings.published_at >= '2021-07-07'
+AND postings.published_at < '2025-02-02'
+GROUP BY job.title, postings.published_at;
+
+##call it: select * from engineers_feb_july;
+
